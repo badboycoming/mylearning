@@ -1,0 +1,372 @@
+﻿
+
+Windows用户git官网下载安装包：https://git-scm.com/
+双击一路Next安装完毕
+打开Git Bash，设置如下，
+
+$ git config --global user.name "Your Name"
+$ git config --global user.email "email@example.com"
+
+注意：--global 是全局参数，也就是在当前这台电脑上的所有 Git 仓库下都有用。
+
+//========================================================================================
+
+git init                            : 在工程目录下运行，创建一个Git仓库
+
+git add <file> [file [file] ...]    : 添加新file或修改file到Git仓库，可多次使用
+git commit -m "here add message"    : 提交更改到Git仓库，注意每次提交默认必须添加信息
+
+git status                          : 查看当前Git仓库状态
+
+git log                             : 打印Git仓库的详细log信息，由最近到最远的修改
+git log --pretty=oneline            : 打印Git仓库的简化log信息，由最近到最远的修改
+git log --graph --pretty=oneline    : 以图示的方式，打印Git仓库的简化信息，由最近到最远的修改
+git log --pretty=oneline --abbrev-commit : 以较短的版本号显示log信息，一般是前7位
+
+git reset --hard HEAD^              : 回退到前一个版本，回退到前两个版本HEAD^^，前三个HEAD^^^，前100个HEAD~100
+git reset --hard xxxxxx             : 回退到某一个版本号指定的版本，只用指定版本的前几位即可（一般6位吧，有冲突再加长）
+
+git reflog                          : 显示之前的各次命令，可以寻找版本号哦……比如要从当前的旧版本再回到某个较新的版本，
+                                      这时需要知道相关版本号信息
+
+//////////////////////////////////////////////////////////////////////////////////////////
+1st common usage: 修改1 -> git add -> git commit -> 修改2 -> git add -> git commit -> ...
+2nd common usage: 修改1 -> git add -> 修改2 -> git add -> ... -> git add -> git commit
+//////////////////////////////////////////////////////////////////////////////////////////
+
+git diff                            : 比较当前本地和Git仓库，可用于简单修改后的仓库对比
+git diff HEAD -- <filename>         : 比较当前某一文件和Git仓库的这个文件
+
+git checkout -- <filename>          : 放弃对本地某一文件的修改(已修改，还未add到暂存区)，重新从Git仓库checkout此文件
+
+git reset HEAD <filename>           : 放弃对本地某一文件的修改(已修改，且已add到暂存区)，先撤销暂存区的add
+git checkout -- <filename>          : 再重新从Git仓库checkout此文件
+
+git reset --hard HEAD^              : 错误的修改了本地某一文件，已add到暂存区了，且已commit到Git仓库了(还未推送到远程库)，
+                                      要放弃对此文件的修改，只能版本回退。如当前这个命令退到前一版本
+
+git rm <filename>                   : 从Git仓库删除某一文件
+git commit -m "here add message"    : 需要提交更改
+
+//============================================================================================
+
+创建SSH Key，如下命令一路回车，将生成 .ssh 文件夹，里面有私钥id_rsa，公钥id_rsa.pub，
+
+$ ssh-keygen -t rsa -C "youremail@example.com"
+
+登录Github，我的账户是: badboycoming，密码是: A******5q
+点击Account Setting，点击 SSH Keys 页面，填入 id_ras.pub 的内容。
+
+关联一个远程库：git remote add origin git@server-name:path/repo-name.git，例如，
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+我要将本地的Git仓库mylearning推送到Github的名为mylearning.git的Repository，
+
+在本地的Git仓库下，运行命令
+$ git remote add origin git@github.com:badboycoming/mylearning.git
+
+首次将本地master分支推送到Github，
+$ git push -u origin master
+
+之后就可以推送最新的修改到Github了，
+$ git push origin master    # 推送 master 分支
+$ git push origin dev       # 推送 dev 分支
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+我要将Github上的远程库克隆到本地，
+
+使用SSH方式（速度最快），
+$ git clone git@github.com:badboycoming/helloworld.git
+
+使用HTTP方式（适用于某公司禁止SSH端口，只开放HTTP端口）
+$ git clone https://github.com/badboycoming/helloworld.git
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Git鼓励大量使用分支，因为Git创建，合并，删除分支非常快，所以Git鼓励你使用分支完成某个任务，
+合并后再删掉分支，这和直接在master分支上工作效果是一样的，但过程更安全。
+
+查看分支                : git branch
+创建分支                : git branch <name>
+切换分支                : git checkout <name>
+创建+切换分支           : git checkout -b <name>
+合并某分支到当前分支    : git merge <name>
+删除分支                : git branch -d <name>
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Git 解决冲突
+
+合并分支出现冲突，手动修改后，add，commit。
+查看分支缩略图          : git log --graph --pretty=oneline --abbrev-commit
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Git 分支管理策略：
+
+通常，合并分支时，如果可能，Git会用到 Fast Forward 模式，但这种模式下，删除分支后，会丢失分支信息。
+如果禁止 Fast Forward 模式，Git 就会在 merge 时生成一个新的 commit，这样，从分支历史上就可以看出分支信息。
+
+假设要合并的分支为dev，禁用 Fast Forward 模式的 merge 命令为，
+$ git merge --no-ff -m "here add message" dev
+
+实际开发中的分支管理策略：
+
+首先，master 分支应该是非常稳定的，也就是用来发布新版本的，平时不能在上面干活。
+然后，建立一个 dev 分支，团队成员都在 dev 分支上干活，当某个时候，比如发布1.0版本的时候，
+把 dev 分支再 merge 到 master 分支上去。
+最后，Git 分支十分强大，在团队开发中应该充分应用。
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git 临时保存工作区
+
+修复 bug 时，一般会通过创建新的 bug 分支进行修复，然后合并，最后删除。
+当手头的 dev 分支的工作没有完成时，先把工作现场用命令 git stash 保存一下，然后切换回 master 分支，
+创建一个新分支例如 bug-101 去修复 bug，然后将更改 merge 到 master 分支，
+再回到 dev 分支，用 git stash pop 恢复之前的工作现场。
+
+高级用法如下：
+
+另一种恢复方法是，用 git stash apply ，但是这种方法不会删除保存的现场，要用 git stash drop 来删除。
+可以用 git stash lis 来查看保存的所有现场，用 git stash apply stash@{x} 来恢复想要的现场。
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git 丢弃一个未合并的分支
+
+一般开发一个新的 feature，最好新建一个分支，
+如果要丢弃一个没有被合并的分支，可以通过命令 git branch -D <name> 强行删除。
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git 多人协作
+
+查看远程库的信息，用命令 git remote            # 一般习惯远程Git仓库默认名称使用 origin，也可随意指定
+查看远程库的详细信息，用命令 git remote -v
+
+推送本地 master 分支到远程 master 分支，用命令 git push origin master
+推送本地 dev 分支到远程 dev 分支，用命令 git push origin dev
+
+哪些分支需要推送，哪些不需要推送 ?
+
+- master 分支是主分支，因此要时刻与远程同步
+- dev 分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步
+- bug 分支只用于本地修复 bug，没不要推到远程了，除非老板要看看你每周修复了几个 bug
+- feature 分支是否推送到远程，取决于你是否和团队成员合作在上面开发
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+现在模拟项目新进一个开发者，
+
+- 首先，他要从远程 Git 仓库 clone，用命令 git clone git@github.com:badboycoming/mylearning.git
+clone 完成后，默认情况下，他只能看到本地的 master 分支
+
+- 因为他需要在本地 dev 分支上开发，所以，他要在本地创建 dev 分支，并把本地 dev 分支和 origin/dev 关联，
+用命令 git checkout -b dev origin/dev
+
+- 然后他就可以在本地 dev 分支上工作，即 git add xxx, git commint -m “xxx”, …… , 然后时不时的将他的开发
+push 到远程 origin/dev，用命令 git push origin dev
+
+如果他对某个文件做了修改，并且已经 push 到远程 origin/dev 分支，而你在本地也修改了同一文件，
+你要将修改 push 到远程 origin/dev 时，会提示发生冲突，这时你需要首先从远程 origin/dev 分支拉去他的更改，
+再你的本地解决冲突，之后再 push 到远程。
+
+拉远程的分支，如当前分支为 dev, 要拉远程的 origin/dev, 用命令 git pull
+注，有时拉远程分支失败，提示信息你的本地分支没有和远程的分支关联，需要先关联，
+用命令 git branch --set-upstream dev origin/dev，然后再 git pull
+
+--------------------------------------------------------------------------------------------------
+总结： 多人协作模式通常是这样，
+
+1) 首先，试图用 git push origin <branch-name> 推送自己的修改
+2) 如果推送失败，则因为远程分支比你的本地分支新，需要先用 git pull 拉远程修改，并自动在本地合并
+3) 如果合并有冲突，git pull 会提示，这时需要手动解决冲突，并在本地提交
+4) 没有冲突，或解决掉冲突后，再用 git push origin <branch-name> 推送
+
+注：如果 git pull 提示 "no tracking information"，则说明本地分支和远程分支的链接关系没有创建，
+用命令 git branch --set-upstream <branch-name> origin/<branch-name> 来链接即可。
+--------------------------------------------------------------------------------------------------
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git 标签管理
+
+git tag <tagname>      : 新建一个标签，默认对 HEAD 当前版本建立，也可以指定一个 commit id,
+                          用命令 git log --pretty=oneline --abbrev-commit 查看 commit id
+
+git tag -a <tagname> -m "blablabla..."  : 添加标签时，指定标签信息
+
+git tag                 : 查看所有标签
+git show <tagname>     : 查看某一标签的详细信息
+
+git tag -d <tagname>   : 删除某一本地标签
+
+git push origin <tagname>  : 推送某个标签到远程
+
+git push origin --tags      : 一次性推送全部尚未推送到远程的本地标签
+
+要删除已推送到远程的标签，需要两步：
+git tag -d <tagname>       : 先删除本地标签
+git push origin :refs/tags/<tagname>  : 再删除远程标签
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git 和 Github 开源仓库
+
+一般情况下，Github 可以作为个人的免费仓库。如果要参与其它开源项目，如下操作：
+
+1) Fork 开源仓库
+2）自己拥有 Fork 后仓库的读写权限
+3) 推送 pull request 给官方仓库贡献代码
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+使用国内的 Git 托管服务 码云（https://gitee.com/）
+
+1) 注册，添加 SSH 公钥
+2) 新建远程项目 mylearning
+3) 在本地 mylearning 下，add 远程 mylearning 仓库，命令如下，
+$ git remote add origin-gitee git@gitee.com:badboycoming/mylearning.git
+
+注意，此处取名为 origin-gitee，因为已经有了一个名为 origin 的远程库，指向 github
+
+例如，现在我的本地 mylearning 库底下已将有两个远程库了，如下，
+
+peterpan@peterpan-PC MINGW64 /e/mylearning (master)
+$ git remote
+origin
+origin-gitee
+
+详细信息如下，可见它们分别指向 github 和 gitee
+
+peterpan@peterpan-PC MINGW64 /e/mylearning (master)
+$ git remote -v
+origin  git@github.com:badboycoming/mylearning.git (fetch)
+origin  git@github.com:badboycoming/mylearning.git (push)
+origin-gitee    git@gitee.com:badboycoming/mylearning.git (fetch)
+origin-gitee    git@gitee.com:badboycoming/mylearning.git (push)
+
+另外，如果要删除本地的某个远程库关联，可用命令如下，
+
+$ git remote rm origin              # 删除本地到 github 远程库的关联 origin
+$ git remote rm origin-gitee        # 删除本地到 gitee 远程库的关联 origin-gitee
+
+4) 要将本地项目推送到远程
+
+$ git push origin-gitee master      # 推送到 gitee
+$ git push origin master            # 推送到 github
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git 配置颜色： git config --global color.ui true
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+忽略特殊文件
+
+有时候，必须把某些文件放在 Git 工作目录(比如你的参考文档，心得笔记，或自动生成的文件如 .pyc 文件)，
+但又不想 git status 报 Untracked files ... 的烦人消息，则可以如下处理。
+
+- 在 Git 工作目录下创建文件 .gitignore，然后把要忽略的文件名填进去，Git就会自动忽略这些文件。
+- 将 .gitignore 提交到 Git 仓库。
+
+注：常用的 .gitignore 可在 https://github.com/github/gitignore 查找并根据自己情况修改使用
+
+忽略文件的原则是：
+
+1) 忽略操作系统自动生成的文件，比如缩略图文件等
+2) 忽略编译生成的中间文件，可执行文件等，比如.pyc，.pyo文件等
+3) 忽略你自己的带有敏感信息的配置文件，比如存放口令的配置文件等
+
+有时，某些被 .gitignore 忽略的文件又想添加到 Git 仓库，那在 add 的时候需要添加 -f 选项，例如，
+
+$ git add -f xxx.pyc
+
+或者你认为是 .gitignore 里哪个规则写错了，可以如下查看，
+
+$ git check-ignore -v xxx.pyc
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+Git Alias
+
+git config --global alias.st status     : st 代替 status
+git config --global alias.co checkout   : co 代替 checkout
+git config --global alias.ci commit     : ci 代替 commit
+git config --global alias.br branch     : br 代替 branch
+
+注：--global 是全局参数，也就是这些命令在这台电脑的所有 Git 仓库下都有用。
+
+git config --global alias.unstage 'reset HEAD'  : unstage 代替 reset HEAD
+git config --global alias.last 'log -1'         : last 代替 log -1
+git config --global alias.lg 'log --graph --pretty=oneline --abbrev-commit --color'  : lg 代替……
+
+变态配置：
+
+git config --global alias.lgx "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"            : lgx 代替……
+
+另，
+
+一般 global 配置内容放在每个 Git 仓库的 .git/config 中 (但是 Win7 下好像没有啊……，这个可能需要用户手动编辑) 
+当前仓库的配置文件放在当前仓库根目录下的 .gitconfig 中 (这个可能需要用户手动新建)
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+搭建 Git 服务器
+
+我们知道，GitHub 是一个免费开源代码托管的远程仓库，但是不能免费建私有仓库。
+比如，公司中的代码一般不能放在 GitHub 上，这时就要在公司建一个 Git 服务器作为私有仓库使用。
+搭建步骤如下，
+
+1) 准备一台 Linux 服务器，推荐用 Ubuntu 或 Debian
+2) 安装 git，用命令 $ sudo apt-get install git
+3) 创建一个 git 用户来运行 git 服务，用命令 $ sudo adduser git
+4) 收集所有要登录的用户公钥，即他们的 id_rsa.pub，把公钥内容导入到 /home/git/.ssh/authorized_keys 文件，一行一个
+5) 初始化 git 仓库，在项目根目录下例如 /srv，用命令 $ sudo git init --bare xxx.git
+
+注：Git 就会创建一个裸仓库，裸仓库没有工作区，因为服务器上的 Git 仓库纯粹是为了共享，所以不让用户直接登录
+    到服务器上去改工作区，所以服务器上的 Git 仓库通常是以 .git 结尾的一个文件。
+
+6) 把 xxx.git 文件的 owner 改为 git，用命令 $ sudo chown -R git:git xxx.git
+7) 禁用 shell 登录，出于安全考虑，第3步创建的 git 用户不允许登录 shell，这可以通过编辑 /etc/passwd 文件来完成，
+   例如，
+   - 找到 git:x:1001:1001:,,,:/home/git:/bin/bash
+   - 改为 git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell
+   这样 git 用户可以正常通过 ssh 使用 git，但无法登录 shell
+
+8) clone 远程仓库，用命令 $ git clone git@server:/srv/xxx.git , 然后就可以开始工作了。
+
+-----------------------------------------------------------------------------------------------
+管理公钥
+如果团队很小，把每个人的公钥收集起来放到服务器的 /home/git/.ssh/authorized_keys 文件里就可以了。
+如果团队规模很大，可以用 Gitosis 来管理公钥，这个就请 Linux 管理员帮助解决吧。
+-----------------------------------------------------------------------------------------------
+管理权限
+对于有些视代码为生命，并且视员工为窃贼的公司，会在版本控制系统里设置一套完善的权限控制。每个人是否
+有读写权限会精确到每个分支甚至每个目录下。因为 Git 是为 Linux 源代码托管而开发的，所以 Git 也就继承了
+开源社区的精神，不支持权限控制。
+不过，因为 Git 支持钩子(hook)，所以，可以在服务器端编写一系列脚本来控制提交等操作，达到权限控制的目的，
+Gitolite 就是这样的工具，这个也就请 Linux 管理员帮助解决吧。
+----------------------------------------------------------------------------------------------
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Git 设置代理 （注意可能使用 https.proxy https://xxx.xxx.xxx.xxx:xxxx，取决于你的代理类型）
+$ git config --global http.proxy http://xxx.xxx.xxx.xxx:xxxx   
+
+
+Git 查看已设置的代理 (注意可能使用 https.proxy，取决于你的代理类型)
+$ git config --global --get http.proxy
+
+
+Git 取消已设置的代理 (注意可能使用 https.proxy，取决于你的代理类型)
+$ git config --global --unset http.proxy
+
+
+完。
+
+
